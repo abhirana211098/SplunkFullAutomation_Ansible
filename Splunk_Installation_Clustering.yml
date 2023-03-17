@@ -51,7 +51,7 @@
 # Indexer Clustering
 # Configure Manager Node
 
-- hosts: manager
+- hosts: _master
   tasks:
      - name: Configuring Manager Node
        become: yes
@@ -71,7 +71,7 @@
 
 # configure peer nodes 
 
-- hosts: peer
+- hosts: _indexer_*
   tasks:
      - name: Configuring Peer Nodes
        become: yes
@@ -92,7 +92,7 @@
  # Search Head Clustering   
  # Configure Deployer
  
- - hosts: deployer
+ - hosts: _deployer
    tasks:
     - name: enable the clustering in deployer
       become: yes
@@ -111,7 +111,7 @@
 # Configure Search Head Members
 
 - name: shc1 
-  hosts: shcluster1
+  hosts: _shc_1
   user: root
   become: yes
 
@@ -126,7 +126,7 @@
       command: /opt/splunk/bin/splunk restart
 
 - name: shc 2 
-  hosts: shcluster2
+  hosts: _shc_2
   user: root
   become: yes
 
@@ -143,7 +143,7 @@
 # Making a Search Head Member a Captain
 
 - name: shc 1 captain
-  hosts: shcluster1
+  hosts: _shc_1
   user: root
   become: yes
 
@@ -153,7 +153,7 @@
 
 # Merging Search Head Cluster with Index CLuster
 - name: merging shc cluster with indexer cluster
-  hosts: allshc
+  hosts: _shc_*
   become_user: root
   become: yes
 
