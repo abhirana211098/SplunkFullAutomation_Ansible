@@ -47,3 +47,118 @@
        become_user: root
        command:
          cmd: /opt/splunk/bin/splunk restart
+
+# Indexer Clustering
+# Configure Manager Node
+
+- hosts: manager
+  tasks:
+     - name: Configuring Manager Node
+       become: yes
+       become_user: root
+       command:
+             cmd: /opt/splunk/bin/splunk edit cluster-config -mode manager -replication_factor 2 -search_factor 2 -secret 123456789 -cluster_label Indexer_Cluster -auth admin:Tata@123
+             
+     - name: pause
+       pause:
+          minutes: 1
+          
+     - name: splunk restart for Configuring Manager Node
+       become: yes
+       become_user: root
+       command:
+             cmd: /opt/splunk/bin/splunk restart
+
+# configure peer nodes 
+
+- hosts: peer
+  tasks:
+     - name: Configuring Peer Nodes
+       become: yes
+       become_user: root
+       command:
+             cmd: /opt/splunk/bin/splunk edit cluster-config -mode peer -manager_uri https://13.232.91.121:8089 -replication_port 8085 -secret 123456789 -auth admin:Tata@123
+             
+     - name: pause
+       pause:
+           minutes: 1
+          
+     - name: splunk restart for Configuring Manager Node
+       become: yes
+       become_user: root
+       command:
+            cmd: /opt/splunk/bin/splunk restart
+ 
+ # Search Head Clustering   
+ # Configure Deployer
+ 
+ - hosts: deployer
+   tasks:
+    - name: enable the clustering in deployer
+      become: yes
+      become_user: root
+      copy: 
+         dest: /opt/splunk/etc/system/local/server.conf
+         content: |
+            [shclustering]
+            shcluster_label = shcluster1
+            pass4SymmKey = 123456789
+    - name: restart
+      become: yes
+      become_user: root
+      command:
+            cmd: /opt/splunk/bin/splunk restart
+
+- name: shc1 
+  hosts: shcluster1
+  user: root
+  become: yes
+
+  tasks:
+    - name: restart splunkd
+      command: /opt/splunk/bin/splunk restart
+      
+    - name: configure search peer 
+      command: /opt/splunk/bin/splunk init shcluster-config -auth admin:Tata@123 -mgmt_uri https://52.66.202.14:8089 -replication_port 8085 -replication_factor 2 -conf_deploy_fetch_url https://43.204.36.251:8089 -secret 123456789 -shcluster_label shcluster1
+
+    - name: restart splunk
+      command: /opt/splunk/bin/splunk restart
+
+- name: shc 2 
+  hosts: shcluster2
+  user: root
+  become: yes
+
+  tasks:
+    - name: restart splunk
+      command: /opt/splunk/bin/splunk restart
+    
+    - name: configure search peer 
+      command: /opt/splunk/bin/splunk init shcluster-config -auth admin:Tata@123 -mgmt_uri https://13.127.240.52:8089 -replication_port 8085 -replication_factor 2 -conf_deploy_fetch_url https://43.204.36.251:8089 -secret 123456789 -shcluster_label shcluster1
+
+    - name: restart splunk
+      command: /opt/splunk/bin/splunk restart
+    
+
+- name: shc 1 captain
+  hosts: shcluster1
+  user: root
+  become: yes
+
+  tasks:
+    - name: Making cluster captain
+      command: /opt/splunk/bin/splunk bootstrap shcluster-captain -servers_list "https://52.66.202.14:8089,https://13.127.240.52:8089" -auth admin:Tata@123
+
+# Merging Search Head Cluster with Index CLuster
+- name: merging shc cluster with indexer cluster
+  hosts: allshc
+  become_user: root
+  become: yes
+
+  tasks:
+    - name: configure indexer cluster with search head 
+      command : /opt/splunk/bin/splunk edit cluster-config -mode searchhead -manager_uri https://13.232.91.121:8089 -secret 123456789 -auth admin:Tata@123
+
+    - name: restart splunk
+      command: /opt/splunk/bin/splunk restart         
+ 
