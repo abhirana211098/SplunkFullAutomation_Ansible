@@ -51,8 +51,8 @@
 # Indexer Clustering
 # Configure Manager Node
 
-- hosts: _master
-  tasks:
+ - hosts: _master
+   tasks:
      - name: Configuring Manager Node
        become: yes
        become_user: root
@@ -71,8 +71,8 @@
 
 # configure peer nodes 
 
-- hosts: _indexer_*
-  tasks:
+ - hosts: _indexer_*
+   tasks:
      - name: Configuring Peer Nodes
        become: yes
        become_user: root
@@ -110,12 +110,12 @@
             cmd: /opt/splunk/bin/splunk restart
 # Configure Search Head Members
 
-- name: shc1 
-  hosts: _shc_1
-  user: root
-  become: yes
+ - name: shc1 
+   hosts: _shc_1
+   user: root
+   become: yes
 
-  tasks:
+   tasks:
     - name: restart splunkd
       command: /opt/splunk/bin/splunk restart
       
@@ -125,12 +125,12 @@
     - name: restart splunk
       command: /opt/splunk/bin/splunk restart
 
-- name: shc 2 
-  hosts: _shc_2
-  user: root
-  become: yes
+ - name: shc 2 
+   hosts: _shc_2
+   user: root
+   become: yes
 
-  tasks:
+   tasks:
     - name: restart splunk
       command: /opt/splunk/bin/splunk restart
     
@@ -142,25 +142,24 @@
     
 # Making a Search Head Member a Captain
 
-- name: shc 1 captain
-  hosts: _shc_1
-  user: root
-  become: yes
+ - name: shc 1 captain
+   hosts: _shc_1
+   user: root
+   become: yes
 
-  tasks:
+   tasks:
     - name: Making cluster captain
       command: /opt/splunk/bin/splunk bootstrap shcluster-captain -servers_list "https://{{groups._shc_1[0]}}:8089,https://{{groups._shc_2[0]}}:8089" -auth admin:Tata@123
 
 # Merging Search Head Cluster with Index CLuster
-- name: merging shc cluster with indexer cluster
-  hosts: _shc_*
-  become_user: root
-  become: yes
+ - name: merging shc cluster with indexer cluster
+   hosts: _shc_*
+   become_user: root
+   become: yes
 
-  tasks:
+   tasks:
     - name: configure indexer cluster with search head 
       command : /opt/splunk/bin/splunk edit cluster-config -mode searchhead -manager_uri https://{{groups._master[0]}}:8089 -secret 123456789 -auth admin:Tata@123
 
     - name: restart splunk
-      command: /opt/splunk/bin/splunk restart         
- 
+      command: /opt/splunk/bin/splunk restart     
