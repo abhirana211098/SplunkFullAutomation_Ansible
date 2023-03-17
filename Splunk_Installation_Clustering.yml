@@ -117,8 +117,6 @@
    become_user: root
 
    tasks:
-    - name: restart splunkd
-      command: /opt/splunk/bin/splunk restart
       
     - name: configure search peer 
       command: /opt/splunk/bin/splunk init shcluster-config -auth admin:Tata@123 -mgmt_uri https://{{groups._shc_1[0]}}:8089 -replication_port 8085 -replication_factor 2 -conf_deploy_fetch_url https://{{groups._deployer[0]}}:8089 -secret 123456789 -shcluster_label shcluster1
@@ -132,8 +130,6 @@
    become_user: root
 
    tasks:
-    - name: restart splunk
-      command: /opt/splunk/bin/splunk restart
     
     - name: configure search peer 
       command: /opt/splunk/bin/splunk init shcluster-config -auth admin:Tata@123 -mgmt_uri https://{{groups._shc_2[0]}}:8089 -replication_port 8085 -replication_factor 2 -conf_deploy_fetch_url https://{{groups._deployer[0]}}:8089 -secret 123456789 -shcluster_label shcluster1
