@@ -108,6 +108,7 @@
       become_user: root
       command:
             cmd: /opt/splunk/bin/splunk restart
+# Configure Search Head Members
 
 - name: shc1 
   hosts: shcluster1
@@ -139,6 +140,7 @@
     - name: restart splunk
       command: /opt/splunk/bin/splunk restart
     
+# Making a Search Head Member a Captain
 
 - name: shc 1 captain
   hosts: shcluster1
