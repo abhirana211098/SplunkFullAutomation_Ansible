@@ -77,7 +77,7 @@
        become: yes
        become_user: root
        command:
-             cmd: /opt/splunk/bin/splunk edit cluster-config -mode peer -manager_uri https://13.232.91.121:8089 -replication_port 8085 -secret 123456789 -auth admin:Tata@123
+             cmd: /opt/splunk/bin/splunk edit cluster-config -mode peer -manager_uri https://{{groups._master[0]}}:8089 -replication_port 8085 -secret 123456789 -auth admin:Tata@123
              
      - name: pause
        pause:
@@ -120,7 +120,7 @@
       command: /opt/splunk/bin/splunk restart
       
     - name: configure search peer 
-      command: /opt/splunk/bin/splunk init shcluster-config -auth admin:Tata@123 -mgmt_uri https://52.66.202.14:8089 -replication_port 8085 -replication_factor 2 -conf_deploy_fetch_url https://43.204.36.251:8089 -secret 123456789 -shcluster_label shcluster1
+      command: /opt/splunk/bin/splunk init shcluster-config -auth admin:Tata@123 -mgmt_uri https://{{groups._shc_1[0]}}:8089 -replication_port 8085 -replication_factor 2 -conf_deploy_fetch_url https://{{groups._deployer[0]}}:8089 -secret 123456789 -shcluster_label shcluster1
 
     - name: restart splunk
       command: /opt/splunk/bin/splunk restart
@@ -135,7 +135,7 @@
       command: /opt/splunk/bin/splunk restart
     
     - name: configure search peer 
-      command: /opt/splunk/bin/splunk init shcluster-config -auth admin:Tata@123 -mgmt_uri https://13.127.240.52:8089 -replication_port 8085 -replication_factor 2 -conf_deploy_fetch_url https://43.204.36.251:8089 -secret 123456789 -shcluster_label shcluster1
+      command: /opt/splunk/bin/splunk init shcluster-config -auth admin:Tata@123 -mgmt_uri https://{{groups._shc_2[0]}}:8089 -replication_port 8085 -replication_factor 2 -conf_deploy_fetch_url https://{{groups._deployer[0]}}:8089 -secret 123456789 -shcluster_label shcluster1
 
     - name: restart splunk
       command: /opt/splunk/bin/splunk restart
@@ -149,7 +149,7 @@
 
   tasks:
     - name: Making cluster captain
-      command: /opt/splunk/bin/splunk bootstrap shcluster-captain -servers_list "https://52.66.202.14:8089,https://13.127.240.52:8089" -auth admin:Tata@123
+      command: /opt/splunk/bin/splunk bootstrap shcluster-captain -servers_list "https://{{groups._shc_1[0]}}:8089,https://{{groups._shc_2[0]}}:8089" -auth admin:Tata@123
 
 # Merging Search Head Cluster with Index CLuster
 - name: merging shc cluster with indexer cluster
@@ -159,7 +159,7 @@
 
   tasks:
     - name: configure indexer cluster with search head 
-      command : /opt/splunk/bin/splunk edit cluster-config -mode searchhead -manager_uri https://13.232.91.121:8089 -secret 123456789 -auth admin:Tata@123
+      command : /opt/splunk/bin/splunk edit cluster-config -mode searchhead -manager_uri https://{{groups._master[0]}}:8089 -secret 123456789 -auth admin:Tata@123
 
     - name: restart splunk
       command: /opt/splunk/bin/splunk restart         
